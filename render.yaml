@@ -8,10 +8,6 @@ services:
     envVars:
       - key: NODE_ENV
         value: production
-      - key: DATABASE_URL
-        fromDatabase:
-          name: yuiapi-db
-          property: connectionString
       - key: JWT_SECRET
         generateValue: true
       - key: CORS_ORIGINS
@@ -20,6 +16,3 @@ services:
         value: "1"
       - key: LOG_LEVEL
         value: info
-databases:
-  - name: yuiapi-db
-    plan: free
