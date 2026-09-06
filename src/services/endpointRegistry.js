@@ -1,3 +1,5 @@
+'use strict';
+
 const fs = require('node:fs');
 const path = require('node:path');
 const express = require('express');
@@ -16,7 +18,7 @@ const SUPPORTED_METHODS = new Set([
   'head'
 ]);
 
-const ENDPOINTS_ROOT = path.join(__dirname, '..', 'endpoints');
+const ENDPOINTS_ROOT = path.resolve(__dirname, '..', 'endpoints');
 
 function normalizeMeta(meta, category, file) {
   if (!meta || typeof meta !== 'object') {
@@ -27,7 +29,7 @@ function normalizeMeta(meta, category, file) {
     throw new TypeError(`Endpoint path is required: ${category}/${file}`);
   }
 
-  const method = String(meta.method || 'GET').toLowerCase();
+  const method = String(meta.method || 'GET').trim().toLowerCase();
   if (!SUPPORTED_METHODS.has(method)) {
     throw new TypeError(`Unsupported HTTP method "${meta.method}": ${category}/${file}`);
   }
@@ -38,8 +40,8 @@ function normalizeMeta(meta, category, file) {
     auth: false,
     ...meta,
     method: method.toUpperCase(),
-    path: meta.path.trim(),
-    category: meta.category || category,
+    path: meta.path.trim().startsWith('/') ? meta.path.trim() : `/${meta.path.trim()}`,
+    category: String(meta.category || category).trim() || category,
     file: `${category}/${file}`
   };
 }
@@ -47,6 +49,10 @@ function normalizeMeta(meta, category, file) {
 function getEndpointFiles() {
   if (!fs.existsSync(ENDPOINTS_ROOT)) {
     throw new Error(`Endpoints directory not found: ${ENDPOINTS_ROOT}`);
+  }
+
+  if (!fs.statSync(ENDPOINTS_ROOT).isDirectory()) {
+    throw new Error(`Endpoints path is not a directory: ${ENDPOINTS_ROOT}`);
   }
 
   return fs
@@ -58,7 +64,7 @@ function getEndpointFiles() {
 
       return fs
         .readdirSync(categoryPath, { withFileTypes: true })
-        .filter(entry => entry.isFile() && entry.name.endsWith('.js'))
+        .filter(entry => entry.isFile() && path.extname(entry.name).toLowerCase() === '.js')
         .sort((a, b) => a.name.localeCompare(b.name))
         .map(fileEntry => ({
           category: categoryEntry.name,
@@ -87,10 +93,12 @@ function loadEndpoints() {
       );
     }
 
-    if (!mod || typeof mod.handler !== 'function') {
-      throw new TypeError(
-        `Endpoint handler must be a function: ${endpoint.category}/${endpoint.file}`
-      );
+    if (!mod || typeof mod !== 'object') {
+      throw new TypeError(`Endpoint module must export an object: ${endpoint.category}/${endpoint.file}`);
+    }
+
+    if (typeof mod.handler !== 'function') {
+      throw new TypeError(`Endpoint handler must be a function: ${endpoint.category}/${endpoint.file}`);
     }
 
     const meta = normalizeMeta(mod.meta, endpoint.category, endpoint.file);
@@ -132,9 +140,24 @@ function getCategories() {
     }));
 }
 
+function getStats() {
+  const methods = {};
+
+  for (const endpoint of registry) {
+    methods[endpoint.method] = (methods[endpoint.method] || 0) + 1;
+  }
+
+  return {
+    endpoints: registry.length,
+    categories: getCategories().length,
+    methods
+  };
+}
+
 module.exports = {
   router,
   loadEndpoints,
   getRegistry,
-  getCategories
+  getCategories,
+  getStats
 };
