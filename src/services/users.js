@@ -1,1 +1,13 @@
-const bcrypt=require('bcryptjs');const prisma=require('../database/prisma');async function hashPassword(p){return bcrypt.hash(p,12)}async function verifyPassword(p,h){return bcrypt.compare(p,h)}async function createUser({username,email,password,role='user',plan='FREE'}){return prisma.user.create({data:{username,email:email.toLowerCase(),passwordHash:await hashPassword(password),role,plan}})}module.exports={hashPassword,verifyPassword,createUser};
+const bcrypt = require('bcryptjs');
+const { users, now, id } = require('../database/store');
+
+async function hashPassword(password) { return bcrypt.hash(password, 12); }
+async function verifyPassword(password, hash) { return bcrypt.compare(password, hash); }
+
+async function createUser({ username, email, password, role = 'user', plan = 'FREE' }) {
+  const user = { id: id(), username, email: email.toLowerCase(), passwordHash: await hashPassword(password), role, status: 'active', plan, createdAt: now(), updatedAt: now(), lastLogin: null };
+  users.set(user.id, user);
+  return user;
+}
+
+module.exports = { hashPassword, verifyPassword, createUser };
