@@ -3,7 +3,9 @@
 Plataforma REST multipropósito profesional, modular y preparada para crecer a cientos de endpoints.
 
 ## Stack
-Node.js, Express, PostgreSQL, Prisma, JWT, bcryptjs, Helmet, CORS, rate limiting, Zod, Pino, EJS, Swagger/OpenAPI y Redis/Valkey opcional.
+Node.js, Express, PostgreSQL, JWT, bcryptjs, Helmet, CORS, rate limiting, Zod, Pino, EJS, Swagger/OpenAPI y Redis/Valkey opcional.
+
+> **Nota:** YuiAPI no utiliza Prisma. La aplicación no depende de `@prisma/client`, `prisma generate` ni migraciones de Prisma.
 
 ## Funciones
 - Usuarios, registro, login, logout y recuperación de contraseña.
@@ -18,8 +20,6 @@ Node.js, Express, PostgreSQL, Prisma, JWT, bcryptjs, Helmet, CORS, rate limiting
 ```bash
 cp .env.example .env
 npm install
-npx prisma generate
-npx prisma migrate dev --name init
 npm run admin:create -- admin admin@example.com 'cambia-esta-clave'
 npm run dev
 ```
@@ -27,8 +27,6 @@ npm run dev
 ## Producción
 ```bash
 npm ci
-npx prisma generate
-npx prisma migrate deploy
 npm start
 ```
 
@@ -41,4 +39,4 @@ Gestión: `/login`, `/register`, `/dashboard`, `/docs`, `/admin`.
 Crea, por ejemplo, `src/endpoints/search/deezer.js` con `{meta,handler}`. El cargador lo descubre al iniciar; no edites `routes/index.js`.
 
 ## Render
-`render.yaml` crea el Web Service y PostgreSQL. `DATABASE_URL` se conecta automáticamente y `JWT_SECRET` se genera. El proceso escucha `0.0.0.0` y usa `process.env.PORT`.
+`render.yaml` crea el Web Service y PostgreSQL. `DATABASE_URL` se conecta automáticamente y `JWT_SECRET` se genera. El proceso escucha `0.0.0.0` y usa `process.env.PORT`. El build solo ejecuta `npm ci`; no se ejecuta ningún comando de Prisma.
