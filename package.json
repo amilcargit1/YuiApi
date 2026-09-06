@@ -1,1 +1,35 @@
-{"name":"yuiapi","version":"1.0.0","private":true,"description":"YuiAPI - professional multipurpose REST API platform","main":"src/server.js","scripts":{"dev":"node --watch src/server.js","start":"node src/server.js","test":"node --test","prisma:generate":"prisma generate","prisma:migrate":"prisma migrate deploy","prisma:dev":"prisma migrate dev","admin:create":"node scripts/create-admin.js"},"engines":{"node":">=20"},"dependencies":{"@prisma/client":"^6.15.0","bcryptjs":"^3.0.2","cookie-parser":"^1.4.7","cors":"^2.8.5","dotenv":"^17.2.1","ejs":"^3.1.10","express":"^5.1.0","express-rate-limit":"^8.0.1","helmet":"^8.1.0","ioredis":"^5.7.0","jsonwebtoken":"^9.0.2","pino":"^9.9.0","pino-http":"^10.5.0","swagger-ui-express":"^5.0.1","zod":"^4.1.5"},"devDependencies":{"supertest":"^7.1.4"}}
+{
+  "name": "yuiapi",
+  "version": "1.0.0",
+  "private": true,
+  "description": "YuiAPI - professional multipurpose REST API platform",
+  "main": "src/server.js",
+  "scripts": {
+    "dev": "node --watch src/server.js",
+    "start": "node src/server.js",
+    "test": "node --test",
+    "admin:create": "node scripts/create-admin.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "bcryptjs": "^3.0.2",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.1",
+    "ejs": "^3.1.10",
+    "express": "^5.1.0",
+    "express-rate-limit": "^8.0.0",
+    "helmet": "^8.1.0",
+    "ioredis": "^5.7.0",
+    "jsonwebtoken": "^9.0.2",
+    "pino": "^9.9.0",
+    "pino-http": "^10.5.0",
+    "swagger-ui-express": "^5.0.1",
+    "zod": "^4.1.5"
+  },
+  "devDependencies": {
+    "supertest": "^7.1.4"
+  }
+}
