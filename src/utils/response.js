@@ -1,2 +1,0 @@
-'use strict';
-function ok(res,{code=200,message='Success',data={}}={}){return res.status(code).json({status:true,code,message,data});}function fail(res,{code=400,message='Bad request',data=null}={}){return res.status(code).json({status:false,code,message,data});}class ApiError extends Error{constructor(message,code=400,data=null){super(message);this.name='ApiError';this.code=code;this.data=data;}}module.exports={ok,fail,ApiError};

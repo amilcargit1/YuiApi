@@ -1,5 +1,0 @@
-'use strict';
-const pinoHttp=require('pino-http');const logger=require('../config/logger');const {logRequest}=require('../services/statistics');const {anonymizeIp,getClientIp}=require('../utils/ip');
-const httpLogger=pinoHttp({logger,autoLogging:true,customLogLevel:(req,res,err)=>{if(err||res.statusCode>=500)return'error';if(res.statusCode>=400)return'warn';return'info';},serializers:{req(req){return{method:req.method,url:req.url};}}});
-function apiRequestLogger(){return(req,res,next)=>{const startedAt=process.hrtime.bigint();res.on('finish',()=>{const durationMs=Number(process.hrtime.bigint()-startedAt)/1e6;const category=req.baseUrl?.split('/').filter(Boolean)[2]||null;logRequest({userId:req.apiUser?.id||null,apiKeyId:req.apiKey?.id||null,endpoint:req.originalUrl.split('?')[0],method:req.method,category,statusCode:res.statusCode,durationMs:Math.round(durationMs),ipHash:anonymizeIp(getClientIp(req)),userAgent:req.headers['user-agent']||null}).catch((err)=>logger.error({err},'No se pudo guardar el log de la solicitud.'));});next();};}
-module.exports={httpLogger,apiRequestLogger};

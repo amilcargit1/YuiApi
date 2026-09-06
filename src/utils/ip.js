@@ -1,2 +1,0 @@
-'use strict';
-const crypto=require('crypto');const env=require('../config/env');function anonymizeIp(ip){if(!ip)return null;const normalized=ip.replace('::ffff:','');return crypto.createHash('sha256').update(normalized+env.JWT_SECRET).digest('hex').slice(0,16);}function getClientIp(req){const forwarded=req.headers['x-forwarded-for'];if(forwarded)return forwarded.split(',')[0].trim();return req.socket?.remoteAddress||req.ip;}module.exports={anonymizeIp,getClientIp};

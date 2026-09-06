@@ -1,5 +1,0 @@
-'use strict';
-const env=require('../config/env'); const logger=require('../config/logger'); const {ApiError}=require('../utils/response');
-function notFoundHandler(req,res){if(req.originalUrl.startsWith('/api'))return res.status(404).json({status:false,code:404,message:'Endpoint no encontrado.',data:null});return res.status(404).send('<h1>404</h1><p>Página no encontrada.</p><a href="/">Volver al inicio</a>');}
-function errorHandler(err,req,res,next){const isApiError=err instanceof ApiError;const code=isApiError?err.code:err.status||err.statusCode||500;if(code>=500)logger.error({err},'Error no controlado.');else logger.warn({errMessage:err.message},'Error de solicitud.');const message=code>=500&&env.IS_PRODUCTION?'Ha ocurrido un error interno. Inténtalo de nuevo más tarde.':err.message||'Error inesperado.';if(req.originalUrl.startsWith('/api'))return res.status(code).json({status:false,code,message,data:isApiError?err.data:null});return res.status(code).send(`<h1>${code}</h1><p>${message}</p><a href="/">Volver al inicio</a>`);}
-module.exports={notFoundHandler,errorHandler};

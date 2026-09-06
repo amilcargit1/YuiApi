@@ -1,2 +1,0 @@
-'use strict';
-const {ok}=require('../../utils/response');const meta={name:'Ping',category:'tools',method:'GET',path:'/api/v1/tools/ping',description:'Comprueba que la API responde correctamente. Útil para probar conectividad y autenticación de API key.',auth:true,params:[],example_request:'GET /api/v1/tools/ping',example_response:{status:true,code:200,message:'Success',data:{pong:true}},version:'v1',tags:['tools','utility']};async function handler(req,res){return ok(res,{data:{pong:true}});}module.exports={meta,handler};
