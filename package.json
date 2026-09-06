@@ -1,0 +1,10 @@
+{
+  "name": "yuiapi-base",
+  "version": "1.0.0",
+  "description": "YuiAPI - Base minima para probar despliegue en Render",
+  "main": "src/server.js",
+  "private": true,
+  "engines": { "node": ">=18.0.0" },
+  "scripts": { "start": "node src/server.js", "dev": "node src/server.js" },
+  "dependencies": { "express": "^4.21.0" }
+}

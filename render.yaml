@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: yuiapi-base
+    runtime: node
+    plan: free
+    region: oregon
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: HOST
+        value: 0.0.0.0
+      - key: APP_NAME
+        value: YuiAPI
+      - key: APP_VERSION
+        value: 1.0.0
