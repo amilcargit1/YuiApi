@@ -1,0 +1,5 @@
+'use strict';
+const env=require('../config/env'); const logger=require('../config/logger'); let client=null; let isReady=false;
+async function initRedis(){if(!env.REDIS_URL){logger.info('REDIS_URL no configurado. YuiAPI funcionará sin caché distribuido (modo memoria).');return null;}try{const {createClient}=require('redis');client=createClient({url:env.REDIS_URL});client.on('error',(err)=>{logger.error({err},'Error en la conexión de Redis/Valkey.');isReady=false;});client.on('ready',()=>{isReady=true;logger.info('Conexión a Redis/Valkey establecida correctamente.');});await client.connect();return client;}catch(err){logger.warn({err},'No se pudo inicializar Redis/Valkey. Continuando sin caché distribuido.');client=null;isReady=false;return null;}}
+function getRedisClient(){return isReady?client:null;} function isRedisEnabled(){return isReady;} async function closeRedis(){if(client){try{await client.quit();}catch(err){}}}
+module.exports={initRedis,getRedisClient,isRedisEnabled,closeRedis};

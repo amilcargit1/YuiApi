@@ -1,0 +1,3 @@
+<%- include('../partials/app-shell-start', { active: 'admin' }) %>
+<div class="content-header"><h1>Endpoints registrados</h1></div><div class="table-wrapper"><table><thead><tr><th>Nombre</th><th>Método</th><th>Ruta</th><th>Categoría</th><th>Auth</th><th>Versión</th><th>Archivo</th></tr></thead><tbody><% endpoints.forEach(function(ep) { %><tr><td><%= ep.meta.name %></td><td><span class="method-tag method-<%= ep.meta.method %>"><%= ep.meta.method %></span></td><td><code><%= ep.meta.path %></code></td><td><%= ep.meta.category %></td><td><%= ep.meta.auth ? 'Sí' : 'No' %></td><td><%= ep.meta.version %></td><td><small style="color:var(--text-muted)"><%= ep.meta.file %></small></td></tr><% }); %></tbody></table></div>
+<%- include('../partials/app-shell-end') %>

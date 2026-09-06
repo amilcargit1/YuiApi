@@ -1,0 +1,115 @@
+// YuiAPI - Prisma Schema
+// Base de datos: PostgreSQL
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role { user moderator admin }
+enum UserStatus { active suspended pending }
+enum PlanName { free developer pro enterprise }
+
+model User {
+  id String @id @default(cuid())
+  username String @unique
+  email String @unique
+  passwordHash String
+  role Role @default(user)
+  status UserStatus @default(active)
+  planName PlanName @default(free)
+  lastLogin DateTime?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  apiKeys ApiKey[]
+  requestLogs RequestLog[]
+  passwordResets PasswordReset[]
+  @@map("users")
+}
+model PasswordReset {
+  id String @id @default(cuid())
+  userId String
+  tokenHash String @unique
+  expiresAt DateTime
+  usedAt DateTime?
+  createdAt DateTime @default(now())
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@index([userId])
+  @@map("password_resets")
+}
+model ApiKey {
+  id String @id @default(cuid())
+  userId String
+  name String @default("Default Key")
+  keyPrefix String
+  keyHash String @unique
+  revoked Boolean @default(false)
+  lastUsedAt DateTime?
+  requestCount Int @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  requestLogs RequestLog[]
+  @@index([userId])
+  @@map("api_keys")
+}
+model Plan {
+  id String @id @default(cuid())
+  name PlanName @unique
+  dailyRequests Int
+  monthlyRequests Int
+  rateLimitPerMin Int
+  priority Int @default(0)
+  features Json?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@map("plans")
+}
+model RequestLog {
+  id String @id @default(cuid())
+  userId String?
+  apiKeyId String?
+  endpoint String
+  method String
+  category String?
+  statusCode Int
+  durationMs Int
+  ipHash String?
+  userAgent String?
+  createdAt DateTime @default(now())
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+  apiKey ApiKey? @relation(fields: [apiKeyId], references: [id], onDelete: SetNull)
+  @@index([userId])
+  @@index([apiKeyId])
+  @@index([endpoint])
+  @@index([createdAt])
+  @@map("request_logs")
+}
+model EndpointMeta {
+  id String @id @default(cuid())
+  name String
+  category String
+  method String
+  path String @unique
+  description String?
+  authRequired Boolean @default(true)
+  version String @default("v1")
+  tags String[] @default([])
+  enabled Boolean @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@map("endpoint_meta")
+}
+model SystemLog {
+  id String @id @default(cuid())
+  level String
+  message String
+  meta Json?
+  createdAt DateTime @default(now())
+  @@index([createdAt])
+  @@map("system_logs")
+}
