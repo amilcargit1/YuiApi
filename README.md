@@ -1,37 +1,40 @@
-# YuiAPI — Base mínima (smoke test para Render)
+# YuiAPI
 
-Esta es una versión **reducida** de YuiAPI, sin PostgreSQL, sin Prisma, sin dashboard ni autenticación. Su único propósito es confirmar que Render puede instalar y correr el proyecto correctamente antes de desplegar la versión completa.
+Plataforma REST multipropósito profesional, modular y preparada para crecer a cientos de endpoints.
 
-Incluye 3 rutas:
+## Incluye
+- Node.js + Express + PostgreSQL + Prisma.
+- Registro/login, JWT HttpOnly, roles y planes.
+- API Keys `YUI_...` almacenadas por hash.
+- Rate limiting por plan.
+- Catálogo automático de endpoints y OpenAPI.
+- Dashboard, historial, estadísticas y panel admin.
+- Health/status/version y Redis/Valkey opcional.
+- Render Blueprint listo.
 
-- `GET /` → info básica
-- `GET /health` → health check (usado por Render para verificar que el servicio está vivo)
-- `GET /version` → versión de la app
-
-## Probar en local
-
+## Instalación
 ```bash
+cp .env.example .env
 npm install
-npm start
-curl http://localhost:3000/health
+npx prisma generate
+npx prisma migrate dev --name init
+npm run admin:create -- admin admin@example.com 'cambia-esta-clave'
+npm run dev
 ```
 
-## Desplegar en Render
+## Producción
+```bash
+npm ci
+npx prisma generate
+npx prisma migrate deploy
+npm start
+```
 
-1. Sube esta carpeta a un repositorio Git (puede ser el mismo repo de YuiAPI en una rama `base-test`, o uno nuevo).
-2. En Render: **New + → Blueprint** → selecciona el repositorio (detecta `render.yaml` automáticamente).
-3. No necesitas configurar ninguna variable de entorno adicional — todo viene fijo en `render.yaml`.
-4. Deploy. Cuando termine, prueba:
-   ```bash
-   curl https://tu-app.onrender.com/health
-   ```
+## API pública inicial
+`GET /api/v1/info`, `/api/v1/tools/ping`, `/api/v1/tools/time`, `/api/v1/tools/base64?text=hola`, `/api/v1/search/example?q=yui`, `/health`, `/status`, `/version`, `/docs`.
 
-Si esto responde `"status": true`, confirma que:
-- Render detecta y ejecuta Node.js correctamente
-- El build (`npm install`) funciona sin errores
-- El servidor escucha en `0.0.0.0` y en el `PORT` que Render asigna
-- El health check pasa (Render no reiniciará el servicio en bucle)
+## Crear endpoints
+Añade un módulo como `src/endpoints/search/deezer.js` exportando `meta` y `handler`. El registro automático lo descubre al arrancar; no hay que editar `routes/index.js`.
 
-## Siguiente paso
-
-Una vez confirmado que esta base funciona, despliega el proyecto completo (con PostgreSQL, Prisma, dashboard, autenticación y el resto de endpoints) siguiendo el `README.md` del proyecto completo.
+## Render
+El Blueprint crea el Web Service y PostgreSQL. `DATABASE_URL` se conecta automáticamente, `JWT_SECRET` se genera, y el servidor escucha en `0.0.0.0` usando `process.env.PORT`.

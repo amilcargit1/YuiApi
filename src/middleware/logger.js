@@ -1,0 +1,1 @@
+const pino=require('pino');const pinoHttp=require('pino-http');const config=require('../config');const logger=pino({level:config.logLevel,redact:['req.headers.authorization','req.headers.cookie','req.body.password','req.body.apiKey']});module.exports={logger,httpLogger:pinoHttp({logger})};

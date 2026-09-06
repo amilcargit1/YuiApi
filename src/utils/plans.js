@@ -1,0 +1,1 @@
+module.exports={FREE:{daily:100,monthly:3000,ratePerMinute:30},DEVELOPER:{daily:5000,monthly:100000,ratePerMinute:120},PRO:{daily:50000,monthly:1000000,ratePerMinute:600},ENTERPRISE:{daily:null,monthly:null,ratePerMinute:3000}};

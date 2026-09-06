@@ -1,0 +1,10 @@
+generator client { provider = "prisma-client-js" }
+datasource db { provider = "postgresql" url = env("DATABASE_URL") }
+
+enum Role { user moderator admin }
+enum UserStatus { active suspended pending }
+enum Plan { FREE DEVELOPER PRO ENTERPRISE }
+model User { id String @id @default(cuid()) username String @unique email String @unique passwordHash String role Role @default(user) status UserStatus @default(active) plan Plan @default(FREE) createdAt DateTime @default(now()) updatedAt DateTime @updatedAt lastLogin DateTime? apiKeys ApiKey[] requestLogs RequestLog[] passwordTokens PasswordResetToken[] }
+model ApiKey { id String @id @default(cuid()) name String prefix String @db.VarChar(20) keyHash String @unique userId String active Boolean @default(true) createdAt DateTime @default(now()) lastUsedAt DateTime? requestCount BigInt @default(0) user User @relation(fields:[userId],references:[id],onDelete:Cascade) requestLogs RequestLog[] @@index([userId,active]) }
+model RequestLog { id String @id @default(cuid()) userId String? apiKeyId String? endpoint String method String statusCode Int durationMs Int ipHash String? userAgent String? createdAt DateTime @default(now()) user User? @relation(fields:[userId],references:[id],onDelete:SetNull) apiKey ApiKey? @relation(fields:[apiKeyId],references:[id],onDelete:SetNull) @@index([createdAt]) @@index([endpoint,createdAt]) @@index([userId,createdAt]) }
+model PasswordResetToken { id String @id @default(cuid()) tokenHash String @unique userId String expiresAt DateTime usedAt DateTime? createdAt DateTime @default(now()) user User @relation(fields:[userId],references:[id],onDelete:Cascade) @@index([userId,expiresAt]) }

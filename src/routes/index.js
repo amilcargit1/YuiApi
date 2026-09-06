@@ -1,0 +1,1 @@
+const router=require('express').Router();router.use('/auth',require('./auth'));router.use('/keys',require('./apiKeys'));router.use('/dashboard',require('./dashboard'));router.use('/users',require('./users'));router.use('/system',require('./system'));module.exports=router;

@@ -1,0 +1,1 @@
+function success(res,data={},message='Success',code=200){return res.status(code).json({status:true,code,message,data})} function error(res,code=400,message='Bad request',data=null){return res.status(code).json({status:false,code,message,data})} module.exports={success,error};

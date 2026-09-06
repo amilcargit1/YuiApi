@@ -1,0 +1,1 @@
+const crypto=require('node:crypto'); const sha256=v=>crypto.createHash('sha256').update(v).digest('hex'); const randomToken=(b=32)=>crypto.randomBytes(b).toString('hex'); const createApiKey=()=>`YUI_${crypto.randomBytes(24).toString('base64url')}`; module.exports={sha256,randomToken,createApiKey};

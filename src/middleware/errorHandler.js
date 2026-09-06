@@ -1,0 +1,1 @@
+const {error}=require('../utils/response');module.exports=(err,req,res,next)=>{req.log?.error({err},'request error');if(res.headersSent)return next(err);const s=Number(err.statusCode||err.status||500);return error(res,s>=400&&s<600?s:500,s>=500?'Internal server error':(err.message||'Request failed'))};

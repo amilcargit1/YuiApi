@@ -1,0 +1,1 @@
+const {success}=require('../../utils/response');module.exports={meta:{name:'Server Time',category:'tools',description:'Obtiene la hora actual del servidor.',method:'GET',path:'/api/v1/tools/time',auth:false,parameters:[],exampleRequest:'GET /api/v1/tools/time',tags:['time']},handler:(req,res)=>success(res,{iso:new Date().toISOString(),unix:Date.now()},'Current time')};

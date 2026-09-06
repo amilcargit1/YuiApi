@@ -1,21 +1,25 @@
 services:
   - type: web
-    name: yuiapi-base
+    name: yuiapi
     runtime: node
     plan: free
-    region: oregon
-    buildCommand: npm install
+    buildCommand: npm ci && npx prisma generate && npx prisma migrate deploy
     startCommand: npm start
-    healthCheckPath: /health
-    autoDeploy: true
     envVars:
       - key: NODE_ENV
         value: production
-      - key: PORT
-        value: 10000
-      - key: HOST
-        value: 0.0.0.0
-      - key: APP_NAME
-        value: YuiAPI
-      - key: APP_VERSION
-        value: 1.0.0
+      - key: DATABASE_URL
+        fromDatabase:
+          name: yuiapi-db
+          property: connectionString
+      - key: JWT_SECRET
+        generateValue: true
+      - key: CORS_ORIGINS
+        value: https://yuiapi-4sbx.onrender.com
+      - key: TRUST_PROXY
+        value: "1"
+      - key: LOG_LEVEL
+        value: info
+databases:
+  - name: yuiapi-db
+    plan: free
