@@ -15,23 +15,31 @@ const SUPPORTED_METHODS = new Set([
   'patch',
   'delete',
   'options',
-  'head'
+  'head',
 ]);
 
 const ENDPOINTS_ROOT = path.resolve(__dirname, '..', 'endpoints');
+const ENDPOINT_EXTENSION = '.js';
 
-function normalizeMeta(meta, category, file) {
-  if (!meta || typeof meta !== 'object') {
-    throw new TypeError(`Invalid endpoint metadata: ${category}/${file}`);
+function normalizePath(value, category, file) {
+  if (typeof value !== 'string' || !value.trim()) {
+    throw new TypeError(`Endpoint path is required: ${category}/${file}`);
   }
 
-  if (typeof meta.path !== 'string' || !meta.path.trim()) {
-    throw new TypeError(`Endpoint path is required: ${category}/${file}`);
+  const normalized = value.trim();
+  return normalized.startsWith('/') ? normalized : `/${normalized}`;
+}
+
+function normalizeMeta(meta, category, file) {
+  if (!meta || typeof meta !== 'object' || Array.isArray(meta)) {
+    throw new TypeError(`Invalid endpoint metadata: ${category}/${file}`);
   }
 
   const method = String(meta.method || 'GET').trim().toLowerCase();
   if (!SUPPORTED_METHODS.has(method)) {
-    throw new TypeError(`Unsupported HTTP method "${meta.method}": ${category}/${file}`);
+    throw new TypeError(
+      `Unsupported HTTP method "${meta.method}": ${category}/${file}`
+    );
   }
 
   return {
@@ -40,9 +48,9 @@ function normalizeMeta(meta, category, file) {
     auth: false,
     ...meta,
     method: method.toUpperCase(),
-    path: meta.path.trim().startsWith('/') ? meta.path.trim() : `/${meta.path.trim()}`,
+    path: normalizePath(meta.path, category, file),
     category: String(meta.category || category).trim() || category,
-    file: `${category}/${file}`
+    file: `${category}/${file}`,
   };
 }
 
@@ -55,23 +63,79 @@ function getEndpointFiles() {
     throw new Error(`Endpoints path is not a directory: ${ENDPOINTS_ROOT}`);
   }
 
-  return fs
+  const categories = fs
     .readdirSync(ENDPOINTS_ROOT, { withFileTypes: true })
     .filter(entry => entry.isDirectory())
-    .sort((a, b) => a.name.localeCompare(b.name))
-    .flatMap(categoryEntry => {
-      const categoryPath = path.join(ENDPOINTS_ROOT, categoryEntry.name);
+    .sort((a, b) => a.name.localeCompare(b.name));
 
-      return fs
-        .readdirSync(categoryPath, { withFileTypes: true })
-        .filter(entry => entry.isFile() && path.extname(entry.name).toLowerCase() === '.js')
-        .sort((a, b) => a.name.localeCompare(b.name))
-        .map(fileEntry => ({
-          category: categoryEntry.name,
-          file: fileEntry.name,
-          absolutePath: path.join(categoryPath, fileEntry.name)
-        }));
-    });
+  return categories.flatMap(categoryEntry => {
+    const categoryPath = path.join(ENDPOINTS_ROOT, categoryEntry.name);
+
+    return fs
+      .readdirSync(categoryPath, { withFileTypes: true })
+      .filter(
+        entry =>
+          entry.isFile() &&
+          path.extname(entry.name).toLowerCase() === ENDPOINT_EXTENSION
+      )
+      .sort((a, b) => a.name.localeCompare(b.name))
+      .map(fileEntry => ({
+        category: categoryEntry.name,
+        file: fileEntry.name,
+        absolutePath: path.join(categoryPath, fileEntry.name),
+      }));
+  });
+}
+
+function clearModuleCache(filePath) {
+  try {
+    delete require.cache[require.resolve(filePath)];
+  } catch {
+    // Module has not been cached yet.
+  }
+}
+
+function loadModule(endpoint) {
+  clearModuleCache(endpoint.absolutePath);
+
+  try {
+    return require(endpoint.absolutePath);
+  } catch (error) {
+    throw new Error(
+      `Failed to load endpoint ${endpoint.category}/${endpoint.file}: ${error.message}`,
+      { cause: error }
+    );
+  }
+}
+
+function registerEndpoint(mod, endpoint) {
+  if (!mod || typeof mod !== 'object' || Array.isArray(mod)) {
+    throw new TypeError(
+      `Endpoint module must export an object: ${endpoint.category}/${endpoint.file}`
+    );
+  }
+
+  if (typeof mod.handler !== 'function') {
+    throw new TypeError(
+      `Endpoint handler must be a function: ${endpoint.category}/${endpoint.file}`
+    );
+  }
+
+  const meta = normalizeMeta(mod.meta, endpoint.category, endpoint.file);
+  const routeKey = `${meta.method}:${meta.path}`;
+
+  if (mountedRoutes.has(routeKey)) {
+    throw new Error(`Duplicate endpoint route detected: ${routeKey}`);
+  }
+
+  const mount = router[meta.method.toLowerCase()];
+  if (typeof mount !== 'function') {
+    throw new Error(`Express does not support HTTP method: ${meta.method}`);
+  }
+
+  mount.call(router, meta.path, mod.handler);
+  mountedRoutes.add(routeKey);
+  registry.push(meta);
 }
 
 function loadEndpoints() {
@@ -81,36 +145,8 @@ function loadEndpoints() {
   const endpoints = getEndpointFiles();
 
   for (const endpoint of endpoints) {
-    let mod;
-
-    try {
-      delete require.cache[require.resolve(endpoint.absolutePath)];
-      mod = require(endpoint.absolutePath);
-    } catch (error) {
-      throw new Error(
-        `Failed to load endpoint ${endpoint.category}/${endpoint.file}: ${error.message}`,
-        { cause: error }
-      );
-    }
-
-    if (!mod || typeof mod !== 'object') {
-      throw new TypeError(`Endpoint module must export an object: ${endpoint.category}/${endpoint.file}`);
-    }
-
-    if (typeof mod.handler !== 'function') {
-      throw new TypeError(`Endpoint handler must be a function: ${endpoint.category}/${endpoint.file}`);
-    }
-
-    const meta = normalizeMeta(mod.meta, endpoint.category, endpoint.file);
-    const routeKey = `${meta.method}:${meta.path}`;
-
-    if (mountedRoutes.has(routeKey)) {
-      throw new Error(`Duplicate endpoint route detected: ${routeKey}`);
-    }
-
-    mountedRoutes.add(routeKey);
-    registry.push(meta);
-    router[meta.method.toLowerCase()](meta.path, mod.handler);
+    const mod = loadModule(endpoint);
+    registerEndpoint(mod, endpoint);
   }
 
   return getRegistry();
@@ -127,8 +163,10 @@ function getCategories() {
   const categories = new Map();
 
   for (const endpoint of registry) {
-    const current = categories.get(endpoint.category) || 0;
-    categories.set(endpoint.category, current + 1);
+    categories.set(
+      endpoint.category,
+      (categories.get(endpoint.category) || 0) + 1
+    );
   }
 
   return [...categories.entries()]
@@ -136,7 +174,7 @@ function getCategories() {
     .map(([name, count]) => ({
       name,
       count,
-      status: 'operational'
+      status: 'operational',
     }));
 }
 
@@ -150,7 +188,7 @@ function getStats() {
   return {
     endpoints: registry.length,
     categories: getCategories().length,
-    methods
+    methods,
   };
 }
 
@@ -159,5 +197,5 @@ module.exports = {
   loadEndpoints,
   getRegistry,
   getCategories,
-  getStats
+  getStats,
 };
