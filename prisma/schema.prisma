@@ -10,9 +10,24 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum Role { user moderator admin }
-enum UserStatus { active suspended pending }
-enum PlanName { free developer pro enterprise }
+enum Role {
+  user
+  moderator
+  admin
+}
+
+enum UserStatus {
+  active
+  suspended
+  pending
+}
+
+enum PlanName {
+  free
+  developer
+  pro
+  enterprise
+}
 
 model User {
   id String @id @default(cuid())
@@ -30,6 +45,7 @@ model User {
   passwordResets PasswordReset[]
   @@map("users")
 }
+
 model PasswordReset {
   id String @id @default(cuid())
   userId String
@@ -41,6 +57,7 @@ model PasswordReset {
   @@index([userId])
   @@map("password_resets")
 }
+
 model ApiKey {
   id String @id @default(cuid())
   userId String
@@ -57,6 +74,7 @@ model ApiKey {
   @@index([userId])
   @@map("api_keys")
 }
+
 model Plan {
   id String @id @default(cuid())
   name PlanName @unique
@@ -69,6 +87,7 @@ model Plan {
   updatedAt DateTime @updatedAt
   @@map("plans")
 }
+
 model RequestLog {
   id String @id @default(cuid())
   userId String?
@@ -89,6 +108,7 @@ model RequestLog {
   @@index([createdAt])
   @@map("request_logs")
 }
+
 model EndpointMeta {
   id String @id @default(cuid())
   name String
@@ -104,6 +124,7 @@ model EndpointMeta {
   updatedAt DateTime @updatedAt
   @@map("endpoint_meta")
 }
+
 model SystemLog {
   id String @id @default(cuid())
   level String
