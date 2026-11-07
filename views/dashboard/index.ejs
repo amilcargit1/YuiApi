@@ -1,1 +1,254 @@
-<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="stylesheet" href="/style.css"><title>Dashboard · YuiAPI</title></head><body><div class="shell"><aside><h2>YuiAPI</h2><a>Overview</a><a href="/docs">Documentation</a><a href="/dashboard">Analytics</a><a href="/admin">Admin</a></aside><main class="content"><p class="eyebrow">DASHBOARD</p><h1>Control center</h1><div id="stats" class="grid"></div></main></div><script>fetch('/api/v1/dashboard/stats').then(r=>r.json()).then(x=>{if(!x.status)location='/login';else{const d=x.data;document.querySelector('#stats').innerHTML=Object.entries(d).slice(0,5).map(([k,v])=>'<article><small>'+k+'</small><h2>'+v+'</h2></article>').join('')}})</script></body></html>
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#080d19">
+  <title>Panel de desarrollador · YuiAPI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body class="yui-dashboard">
+  <div class="yd-app">
+    <aside class="yd-sidebar" id="sidebar">
+      <a class="yd-brand" href="/"><span class="yd-brand-mark">Y</span><span>Yui<span>API</span><small>DEVELOPER CLOUD</small></span></a>
+      <div class="yd-side-label">PLATAFORMA</div>
+      <nav class="yd-nav" aria-label="Navegación principal">
+        <button class="yd-nav-item active" data-view="overview"><span>◫</span> Resumen</button>
+        <button class="yd-nav-item" data-view="keys"><span>⌘</span> Mis API Keys</button>
+        <button class="yd-nav-item" data-view="history"><span>↗</span> Solicitudes</button>
+        <button class="yd-nav-item" data-view="catalog"><span>▦</span> Explorar APIs</button>
+      </nav>
+      <div class="yd-side-label yd-side-label-spaced">CUENTA</div>
+      <nav class="yd-nav" aria-label="Cuenta">
+        <button class="yd-nav-item" data-view="profile"><span>◉</span> Mi perfil</button>
+        <a class="yd-nav-item" href="/docs"><span>⌑</span> Documentación <span class="yd-external">↗</span></a>
+      </nav>
+      <div class="yd-sidebar-bottom">
+        <div class="yd-help-card"><span class="yd-help-icon">✧</span><b>¿Necesitas ayuda?</b><p>Consulta la documentación para integrar YuiAPI.</p><a href="/docs">Ver documentación <span>→</span></a></div>
+        <button class="yd-user-mini" id="sidebar-user" data-view="profile"><span class="yd-avatar" id="mini-avatar">Y</span><span><b id="mini-name">Tu cuenta</b><small id="mini-plan">Plan FREE</small></span><span class="yd-more">···</span></button>
+      </div>
+    </aside>
+
+    <div class="yd-main">
+      <header class="yd-topbar">
+        <button class="yd-icon-button yd-menu-toggle" id="menu-toggle" aria-label="Abrir menú">☰</button>
+        <div class="yd-breadcrumb"><span>YuiAPI</span><i>/</i><b id="breadcrumb-current">Resumen</b></div>
+        <div class="yd-top-actions"><span class="yd-live"><i></i> API operativa</span><a class="yd-doc-link" href="/docs">Documentación <span>↗</span></a><button class="yd-avatar yd-top-avatar" id="top-avatar" data-view="profile">Y</button></div>
+      </header>
+
+      <main class="yd-content">
+        <section class="yd-view active" id="view-overview">
+          <div class="yd-page-heading">
+            <div><div class="yd-eyebrow"><span></span> CENTRO DE DESARROLLO</div><h1>Tu espacio de trabajo<span class="yd-title-dot">.</span></h1><p>Administra tus integraciones y supervisa el uso de YuiAPI.</p></div>
+            <button class="yd-primary-button" data-action="create-key"><span>＋</span> Crear API Key</button>
+          </div>
+          <div class="yd-welcome-strip"><div class="yd-welcome-orb"></div><div><span>BIENVENIDO DE NUEVO</span><h2>Hola, <b id="welcome-name">desarrollador</b> 👋</h2><p>Todo lo que necesitas para construir está aquí.</p></div><div class="yd-welcome-tag"><i></i> Tu cuenta está activa</div></div>
+          <div class="yd-section-heading"><div><h2>Actividad general</h2><p>Resumen de tus solicitudes registradas</p></div><span class="yd-period">Últimas 24 horas y total histórico</span></div>
+          <div class="yd-stats-grid">
+            <article class="yd-stat-card"><div class="yd-stat-top"><span>Solicitudes totales</span><i class="yd-stat-icon cyan">↗</i></div><strong id="stat-total">—</strong><small><span class="yd-stat-dot cyan-dot"></span> Desde que comenzaste</small><div class="yd-stat-line cyan-line"></div></article>
+            <article class="yd-stat-card"><div class="yd-stat-top"><span>Solicitudes recientes</span><i class="yd-stat-icon violet">◷</i></div><strong id="stat-today">—</strong><small>Últimas 24 horas</small><div class="yd-stat-line violet-line"></div></article>
+            <article class="yd-stat-card"><div class="yd-stat-top"><span>Respuestas exitosas</span><i class="yd-stat-icon green">✓</i></div><strong id="stat-success">—</strong><small>Solicitudes sin error</small><div class="yd-stat-line green-line"></div></article>
+            <article class="yd-stat-card"><div class="yd-stat-top"><span>Latencia promedio</span><i class="yd-stat-icon amber">ϟ</i></div><strong id="stat-latency">—<em> ms</em></strong><small>Tiempo de respuesta registrado</small><div class="yd-stat-line amber-line"></div></article>
+          </div>
+          <div class="yd-overview-grid">
+            <section class="yd-panel yd-activity-panel"><div class="yd-panel-heading"><div><h2>Solicitudes recientes</h2><p>Últimas llamadas a tus endpoints</p></div><button class="yd-text-button" data-view="history">Ver historial →</button></div><div id="recent-list" class="yd-recent-list"><div class="yd-loading">Cargando actividad…</div></div></section>
+            <section class="yd-panel yd-quick-panel"><div class="yd-panel-heading"><div><h2>Accesos rápidos</h2><p>Continúa con tu integración</p></div></div><button class="yd-quick-link" data-view="keys"><span class="yd-quick-icon cyan">⌘</span><span><b>Administrar API Keys</b><small>Crear, consultar o revocar claves</small></span><i>→</i></button><button class="yd-quick-link" data-view="catalog"><span class="yd-quick-icon violet">▦</span><span><b>Explorar endpoints</b><small>Descubre las herramientas disponibles</small></span><i>→</i></button><a class="yd-quick-link" href="/docs"><span class="yd-quick-icon green">⌑</span><span><b>Leer documentación</b><small>Guías y referencia de la API</small></span><i>↗</i></a></section>
+          </div>
+          <section class="yd-panel yd-endpoint-preview"><div class="yd-panel-heading"><div><h2>Catálogo de APIs</h2><p>Explora los endpoints disponibles en YuiAPI</p></div><button class="yd-text-button" data-view="catalog">Ver catálogo completo →</button></div><div id="endpoint-preview" class="yd-endpoint-grid"><div class="yd-loading">Cargando catálogo…</div></div></section>
+        </section>
+
+        <section class="yd-view" id="view-keys">
+          <div class="yd-page-heading"><div><div class="yd-eyebrow"><span></span> ACCESO Y AUTENTICACIÓN</div><h1>Mis API Keys<span class="yd-title-dot">.</span></h1><p>Gestiona las credenciales que conectan tus aplicaciones con YuiAPI.</p></div><button class="yd-primary-button" data-action="create-key"><span>＋</span> Crear API Key</button></div>
+          <div class="yd-notice"><span>ⓘ</span><p>Tu clave completa solo se muestra una vez al crearla. Guárdala en un lugar seguro y nunca la publiques en repositorios.</p></div>
+          <div class="yd-panel"><div class="yd-panel-heading"><div><h2>Claves de acceso</h2><p>Credenciales asociadas a tu cuenta</p></div><button class="yd-secondary-button" id="refresh-keys">↻ Actualizar</button></div><div id="keys-list"><div class="yd-loading">Cargando claves…</div></div></div>
+        </section>
+
+        <section class="yd-view" id="view-history">
+          <div class="yd-page-heading"><div><div class="yd-eyebrow"><span></span> OBSERVABILIDAD</div><h1>Historial de solicitudes<span class="yd-title-dot">.</span></h1><p>Consulta las llamadas registradas y sus tiempos de respuesta.</p></div><button class="yd-secondary-button" id="refresh-logs">↻ Actualizar</button></div>
+          <div class="yd-filter-row"><input id="log-endpoint-filter" type="search" placeholder="Filtrar por endpoint…"><select id="log-status-filter"><option value="">Todos los estados</option><option value="200">200 · Correcto</option><option value="400">400 · Solicitud incorrecta</option><option value="401">401 · No autorizado</option><option value="403">403 · Prohibido</option><option value="404">404 · No encontrado</option><option value="429">429 · Límite alcanzado</option><option value="500">500 · Error del servidor</option></select></div>
+          <div class="yd-panel"><div id="logs-list"><div class="yd-loading">Cargando solicitudes…</div></div></div>
+        </section>
+
+        <section class="yd-view" id="view-catalog">
+          <div class="yd-page-heading"><div><div class="yd-eyebrow"><span></span> EXPLORADOR</div><h1>Explorar APIs<span class="yd-title-dot">.</span></h1><p>Encuentra los endpoints disponibles para tus proyectos.</p></div><a class="yd-secondary-button" href="/docs">Documentación completa ↗</a></div>
+          <div class="yd-filter-row"><input id="endpoint-search" type="search" placeholder="Buscar por nombre, ruta o categoría…"><select id="method-filter"><option value="">Todos los métodos</option><option>GET</option><option>POST</option><option>PUT</option><option>PATCH</option><option>DELETE</option></select></div>
+          <div id="catalog-list" class="yd-catalog-list"><div class="yd-loading">Cargando endpoints…</div></div>
+        </section>
+
+        <section class="yd-view" id="view-profile">
+          <div class="yd-page-heading"><div><div class="yd-eyebrow"><span></span> TU CUENTA</div><h1>Mi perfil<span class="yd-title-dot">.</span></h1><p>Información de tu cuenta y estado de tu membresía.</p></div></div>
+          <div class="yd-profile-card"><div class="yd-profile-cover"><div class="yd-profile-glow"></div></div><div class="yd-profile-main"><div class="yd-avatar yd-profile-avatar" id="profile-avatar">Y</div><div class="yd-profile-identity"><h2 id="profile-name">Desarrollador</h2><p id="profile-email">—</p><span class="yd-plan-pill" id="profile-plan">PLAN FREE</span></div></div><div class="yd-profile-details" id="profile-details"><div><small>Nombre de usuario</small><b id="profile-username">—</b></div><div><small>Correo electrónico</small><b id="profile-email-detail">—</b></div><div><small>Miembro desde</small><b id="profile-created">—</b></div><div><small>Estado de cuenta</small><b class="yd-status-active">● Activa</b></div></div></div>
+          <div class="yd-profile-actions"><button class="yd-secondary-button" id="logout-button">Cerrar sesión</button></div>
+        </section>
+      </main>
+      <footer class="yd-footer"><span>© <span id="year"></span> YuiAPI</span><span>Construye algo extraordinario <i>✦</i></span><a href="/docs">Documentación ↗</a></footer>
+    </div>
+  </div>
+  <div class="yd-mobile-overlay" id="mobile-overlay"></div>
+  <div class="yd-modal-backdrop" id="key-modal" aria-hidden="true"><div class="yd-modal" role="dialog" aria-modal="true" aria-labelledby="modal-title"><button class="yd-modal-close" id="modal-close" aria-label="Cerrar">×</button><div class="yd-modal-symbol">⌘</div><h2 id="modal-title">Tu nueva API Key</h2><p>Esta es la única vez que podrás ver la clave completa. Cópiala y guárdala de forma segura.</p><div class="yd-key-reveal"><code id="new-key-value"></code><button id="copy-new-key">Copiar</button></div><div class="yd-modal-actions"><button class="yd-primary-button" id="done-key">Entendido</button></div></div></div>
+  <div class="yd-toast" id="toast" role="status"></div>
+
+  <script>
+  (() => {
+    const $ = (selector, root = document) => root.querySelector(selector);
+    const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
+    const state = { user: null, keys: [], logs: [], endpoints: [], categories: [], view: 'overview', toastTimer: null };
+    const escapeHtml = value => String(value ?? '').replace(/[&<>"']/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
+    const dateText = value => { if (!value) return '—'; const date = new Date(value); return Number.isNaN(date.getTime()) ? '—' : date.toLocaleString('es-PE', { dateStyle: 'medium', timeStyle: 'short' }); };
+    const initials = value => String(value || 'Y').trim().slice(0,1).toUpperCase();
+    const notify = message => { const toast = $('#toast'); toast.textContent = message; toast.classList.add('show'); clearTimeout(state.toastTimer); state.toastTimer = setTimeout(() => toast.classList.remove('show'), 2800); };
+    async function api(path, options = {}) {
+      const response = await fetch(path, { credentials: 'same-origin', ...options, headers: { ...(options.body ? {'Content-Type':'application/json'} : {}), ...(options.headers || {}) } });
+      let payload = {}; try { payload = await response.json(); } catch {}
+      if (response.status === 401) { location.href = '/login'; throw new Error('Tu sesión expiró.'); }
+      if (!response.ok || payload.status === false) throw new Error(payload.message || 'No se pudo completar la solicitud.');
+      return payload.data ?? payload;
+    }
+    function showView(view) {
+      if (!$('#view-' + view)) return;
+      state.view = view;
+      $$('.yd-view').forEach(section => section.classList.toggle('active', section.id === 'view-' + view));
+      $$('.yd-nav-item[data-view]').forEach(button => button.classList.toggle('active', button.dataset.view === view));
+      const labels = { overview:'Resumen', keys:'Mis API Keys', history:'Solicitudes', catalog:'Explorar APIs', profile:'Mi perfil' };
+      $('#breadcrumb-current').textContent = labels[view] || 'Resumen';
+      $('#sidebar').classList.remove('open'); $('#mobile-overlay').classList.remove('show');
+      if (view === 'keys') loadKeys();
+      if (view === 'history') loadLogs();
+      if (view === 'catalog') renderCatalog();
+      if (view === 'profile') renderProfile();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+    function renderUser() {
+      const user = state.user || {};
+      const name = user.username || user.name || 'desarrollador';
+      $('#welcome-name').textContent = name;
+      $('#mini-name').textContent = name;
+      $('#mini-plan').textContent = 'Plan ' + (user.plan || 'FREE');
+      $('#mini-avatar').textContent = initials(name);
+      $('#top-avatar').textContent = initials(name);
+    }
+    async function loadStats() {
+      const data = await api('/api/v1/dashboard/stats');
+      $('#stat-total').textContent = Number(data.totalRequests || 0).toLocaleString('es-PE');
+      $('#stat-today').textContent = Number(data.todayRequests || 0).toLocaleString('es-PE');
+      $('#stat-success').textContent = Number(data.successfulRequests || 0).toLocaleString('es-PE');
+      $('#stat-latency').innerHTML = escapeHtml(data.averageLatencyMs || 0) + '<em> ms</em>';
+      state.logs = data.recent || [];
+      renderRecent();
+    }
+    async function loadKeys() {
+      $('#keys-list').innerHTML = '<div class="yd-loading">Cargando claves…</div>';
+      try { state.keys = await api('/api/v1/keys'); renderKeys(); } catch (error) { $('#keys-list').innerHTML = '<div class="yd-empty">No se pudieron cargar las claves. ' + escapeHtml(error.message) + '</div>'; }
+    }
+    function renderKeys() {
+      const host = $('#keys-list');
+      if (!state.keys.length) { host.innerHTML = '<div class="yd-empty"><span>⌘</span><b>Aún no tienes API Keys</b><p>Crea tu primera clave para conectar tus aplicaciones con YuiAPI.</p><button class="yd-primary-button" data-action="create-key">＋ Crear API Key</button></div>'; return; }
+      host.innerHTML = '<div class="yd-key-list">' + state.keys.map(key => '<article class="yd-key-row"><div class="yd-key-leading">⌘</div><div class="yd-key-info"><b>' + escapeHtml(key.name) + '</b><code>' + escapeHtml(key.prefix || 'YUI_') + '••••••••••••</code><small>Creada ' + escapeHtml(dateText(key.createdAt)) + ' · Último uso: ' + escapeHtml(dateText(key.lastUsedAt)) + '</small></div><span class="yd-key-state ' + (key.active ? 'is-active' : 'is-revoked') + '">' + (key.active ? 'Activa' : 'Revocada') + '</span><div class="yd-key-actions">' + (key.active ? '<button data-revoke="' + escapeHtml(key.id) + '">Revocar</button>' : '') + '<button class="danger" data-delete="' + escapeHtml(key.id) + '">Eliminar</button></div></article>').join('') + '</div>';
+    }
+    async function createKey() {
+      const name = prompt('Nombre para tu nueva API Key:', 'Mi aplicación');
+      if (name === null) return;
+      if (!name.trim()) { notify('Escribe un nombre para la clave.'); return; }
+      try {
+        const key = await api('/api/v1/keys', { method: 'POST', body: JSON.stringify({ name: name.trim() }) });
+        $('#new-key-value').textContent = key.key || '';
+        $('#key-modal').classList.add('show'); $('#key-modal').setAttribute('aria-hidden', 'false');
+        await loadKeys();
+      } catch (error) { notify(error.message); }
+    }
+    async function revokeKey(id) {
+      if (!confirm('¿Quieres revocar esta API Key? Las aplicaciones que la utilicen dejarán de autenticarse.')) return;
+      try { await api('/api/v1/keys/' + encodeURIComponent(id) + '/revoke', { method: 'POST' }); notify('API Key revocada.'); await loadKeys(); }
+      catch (error) { notify(error.message); }
+    }
+    async function deleteKey(id) {
+      if (!confirm('¿Eliminar definitivamente esta API Key?')) return;
+      try { await api('/api/v1/keys/' + encodeURIComponent(id), { method: 'DELETE' }); notify('API Key eliminada.'); await loadKeys(); }
+      catch (error) { notify(error.message); }
+    }
+    async function copyText(value) {
+      try {
+        if (navigator.clipboard && window.isSecureContext) await navigator.clipboard.writeText(value);
+        else { const area = document.createElement('textarea'); area.value = value; area.style.position = 'fixed'; area.style.opacity = '0'; document.body.appendChild(area); area.select(); const copied = document.execCommand('copy'); area.remove(); if (!copied) throw new Error('copy'); }
+        notify('API Key copiada al portapapeles.');
+      } catch { notify('No se pudo copiar. Selecciona la clave y cópiala manualmente.'); }
+    }
+    function methodClass(method) { return 'method-' + String(method || 'GET').toLowerCase(); }
+    function renderRecent() {
+      const host = $('#recent-list');
+      if (!state.logs.length) { host.innerHTML = '<div class="yd-empty-inline">Todavía no hay solicitudes registradas.</div>'; return; }
+      host.innerHTML = state.logs.slice(0,6).map(row => '<div class="yd-recent-row"><span class="yd-method ' + methodClass(row.method) + '">' + escapeHtml(row.method) + '</span><code>' + escapeHtml(row.endpoint) + '</code><span class="yd-response ' + (row.statusCode < 400 ? 'ok' : 'bad') + '">' + escapeHtml(row.statusCode) + '</span><small>' + escapeHtml(dateText(row.createdAt)) + '</small></div>').join('');
+    }
+    async function loadLogs() {
+      $('#logs-list').innerHTML = '<div class="yd-loading">Cargando solicitudes…</div>';
+      try { state.logs = await api('/api/v1/dashboard/logs'); renderLogs(); }
+      catch (error) { $('#logs-list').innerHTML = '<div class="yd-empty">' + escapeHtml(error.message) + '</div>'; }
+    }
+    function renderLogs() {
+      const endpoint = ($('#log-endpoint-filter').value || '').toLowerCase();
+      const status = $('#log-status-filter').value;
+      const rows = state.logs.filter(row => (!endpoint || String(row.endpoint).toLowerCase().includes(endpoint)) && (!status || String(row.statusCode) === status));
+      $('#logs-list').innerHTML = rows.length ? '<div class="yd-table-wrap"><table class="yd-table"><thead><tr><th>MÉTODO</th><th>ENDPOINT</th><th>ESTADO</th><th>LATENCIA</th><th>FECHA</th></tr></thead><tbody>' + rows.map(row => '<tr><td><span class="yd-method ' + methodClass(row.method) + '">' + escapeHtml(row.method) + '</span></td><td><code>' + escapeHtml(row.endpoint) + '</code></td><td><span class="yd-response ' + (row.statusCode < 400 ? 'ok' : 'bad') + '">' + escapeHtml(row.statusCode) + '</span></td><td>' + escapeHtml(row.durationMs) + ' ms</td><td>' + escapeHtml(dateText(row.createdAt)) + '</td></tr>').join('') + '</tbody></table></div>' : '<div class="yd-empty-inline">No hay solicitudes que coincidan con esos filtros.</div>';
+    }
+    async function loadCatalog() {
+      try { const data = await api('/api/v1/dashboard/endpoints'); state.endpoints = data.endpoints || []; state.categories = data.categories || []; renderEndpointPreview(); renderCatalog(); }
+      catch { $('#endpoint-preview').innerHTML = '<div class="yd-empty-inline">No se pudo cargar el catálogo.</div>'; }
+    }
+    function endpointCard(endpoint) {
+      return '<article class="yd-endpoint-card"><div><span class="yd-method ' + methodClass(endpoint.method) + '">' + escapeHtml(endpoint.method) + '</span><span class="yd-endpoint-category">' + escapeHtml(endpoint.category || 'General') + '</span></div><code>' + escapeHtml(endpoint.path) + '</code><p>' + escapeHtml(endpoint.description || endpoint.name || 'Endpoint de YuiAPI') + '</p><div class="yd-endpoint-foot"><span>' + (endpoint.auth ? '⌑ Requiere API Key' : '◎ Acceso público') + '</span><a href="/docs">Ver detalles ↗</a></div></article>';
+    }
+    function renderEndpointPreview() { $('#endpoint-preview').innerHTML = state.endpoints.length ? state.endpoints.slice(0,3).map(endpointCard).join('') : '<div class="yd-empty-inline">El catálogo todavía no tiene endpoints.</div>'; }
+    function renderCatalog() {
+      const host = $('#catalog-list');
+      const query = ($('#endpoint-search')?.value || '').toLowerCase();
+      const method = $('#method-filter')?.value || '';
+      const filtered = state.endpoints.filter(endpoint => (!method || endpoint.method === method) && (!query || [endpoint.path,endpoint.name,endpoint.description,endpoint.category].join(' ').toLowerCase().includes(query)));
+      host.innerHTML = filtered.length ? filtered.map(endpointCard).join('') : '<div class="yd-empty-inline">No se encontraron endpoints.</div>';
+    }
+    function renderProfile() {
+      const user = state.user || {};
+      const name = user.username || user.name || 'Desarrollador';
+      $('#profile-avatar').textContent = initials(name);
+      $('#profile-name').textContent = name;
+      $('#profile-email').textContent = user.email || 'Correo no disponible';
+      $('#profile-plan').textContent = 'PLAN ' + (user.plan || 'FREE');
+      $('#profile-username').textContent = user.username || '—';
+      $('#profile-email-detail').textContent = user.email || '—';
+      $('#profile-created').textContent = user.createdAt ? new Date(user.createdAt).toLocaleDateString('es-PE', { dateStyle:'long' }) : '—';
+    }
+    async function boot() {
+      $('#year').textContent = new Date().getFullYear();
+      try {
+        state.user = await api('/api/v1/auth/me');
+        renderUser(); renderProfile();
+        await Promise.allSettled([loadStats(), loadCatalog()]);
+      } catch (error) { if (error.message) notify(error.message); }
+    }
+    document.addEventListener('click', event => {
+      const view = event.target.closest('[data-view]'); if (view) { showView(view.dataset.view); return; }
+      const action = event.target.closest('[data-action]'); if (action?.dataset.action === 'create-key') { createKey(); return; }
+      const revoke = event.target.closest('[data-revoke]'); if (revoke) { revokeKey(revoke.dataset.revoke); return; }
+      const remove = event.target.closest('[data-delete]'); if (remove) { deleteKey(remove.dataset.delete); return; }
+    });
+    $('#menu-toggle').addEventListener('click', () => { $('#sidebar').classList.toggle('open'); $('#mobile-overlay').classList.toggle('show'); });
+    $('#mobile-overlay').addEventListener('click', () => { $('#sidebar').classList.remove('open'); $('#mobile-overlay').classList.remove('show'); });
+    $('#refresh-keys').addEventListener('click', loadKeys);
+    $('#refresh-logs').addEventListener('click', loadLogs);
+    $('#log-endpoint-filter').addEventListener('input', renderLogs);
+    $('#log-status-filter').addEventListener('change', renderLogs);
+    $('#endpoint-search').addEventListener('input', renderCatalog);
+    $('#method-filter').addEventListener('change', renderCatalog);
+    $('#modal-close').addEventListener('click', closeModal);
+    $('#done-key').addEventListener('click', closeModal);
+    $('#copy-new-key').addEventListener('click', () => copyText($('#new-key-value').textContent));
+    $('#key-modal').addEventListener('click', event => { if (event.target === $('#key-modal')) closeModal(); });
+    function closeModal() { $('#key-modal').classList.remove('show'); $('#key-modal').setAttribute('aria-hidden', 'true'); }
+    $('#logout-button').addEventListener('click', async () => { try { await api('/api/v1/auth/logout', { method:'POST' }); } catch {} location.href = '/login'; });
+    boot();
+  })();
+  </script>
+</body>
+</html>
