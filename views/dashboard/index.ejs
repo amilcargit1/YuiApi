@@ -219,12 +219,25 @@
       $('#profile-email-detail').textContent = user.email || '—';
       $('#profile-created').textContent = user.createdAt ? new Date(user.createdAt).toLocaleDateString('es-PE', { dateStyle:'long' }) : '—';
     }
+    async function checkApiHealth() {
+      const label = $('#api-health');
+      try {
+        const response = await fetch('/health', { credentials: 'same-origin' });
+        const health = await response.json();
+        const operational = response.ok && health.status === true;
+        label.innerHTML = '<i></i> ' + (operational ? 'API operativa' : 'API con incidencias');
+        label.classList.toggle('is-warning', !operational);
+      } catch {
+        label.innerHTML = '<i></i> Estado no disponible';
+        label.classList.add('is-warning');
+      }
+    }
     async function boot() {
       $('#year').textContent = new Date().getFullYear();
       try {
         state.user = await api('/api/v1/auth/me');
         renderUser(); renderProfile();
-        await Promise.allSettled([loadStats(), loadCatalog()]);
+        await Promise.allSettled([loadStats(), loadCatalog(), checkApiHealth()]);
       } catch (error) { if (error.message) notify(error.message); }
     }
     document.addEventListener('click', event => {
